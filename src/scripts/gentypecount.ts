@@ -1,13 +1,9 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient({ log: [] });
+import { prisma } from "../server/db.ts";
 
 async function main() {
   const gens = await prisma.generation.findMany();
   const types = await prisma.type.findMany();
-  const genAndTypes = gens.flatMap((gen) =>
-    types.map((t) => ({ gen, type: t })),
-  );
+  const genAndTypes = gens.flatMap((gen) => types.map((t) => ({ gen, type: t })));
 
   const genAndTypesAndCount = await Promise.all(
     genAndTypes.map(async ({ gen, type }) => ({
@@ -29,19 +25,15 @@ async function main() {
   );
 
   console.log("Invalid Generation/Type combinations");
-  for (const { gen, type } of genAndTypesAndCount.filter(
-    ({ count }) => count === 0,
-  )) {
+  for (const { gen, type } of genAndTypesAndCount.filter(({ count }) => count === 0)) {
     console.log(`Gen ${gen.name} with ${type.name} Type`);
   }
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
+  .then(prisma.$disconnect)
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
-    process.exit(1);
+    Deno.exit(1);
   });

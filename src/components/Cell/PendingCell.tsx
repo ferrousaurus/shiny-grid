@@ -1,24 +1,22 @@
-"use client";
-
-import Image from "next/image";
-import { Suspense, useRef, useState } from "react";
-import { type Pokemon } from "~/lib/data/dex";
-import { type CategoryId, categories } from "~/lib/categories";
-import { api } from "~/utils/api";
-import { useSession } from "next-auth/react";
-import { type Seed } from "~/lib/getCategories";
-import LoadedCell from "./LoadedCell";
-import CellImage from "./CellImage";
-import { tests } from "~/lib/categories";
-import { useGuessContext } from "~/lib/contexts/GuessContext";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { type Pokemon } from "../../lib/data/dex.tsx";
+import { type CategoryId, categories, tests } from "../../lib/categories.tsx";
+import { authClient } from "../../lib/auth-client.ts";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
+import { useRef, useState } from "react";
+import { type Seed } from "../../lib/getCategories.ts";
+import { makeGuess } from "../../lib/functions/makeGuess.ts";
+import LoadedCell from "./LoadedCell.tsx";
+import { useGuessContext } from "../../lib/contexts/GuessContext.ts";
+import { Input } from "../ui/input.tsx";
+import { Button } from "../ui/button.tsx";
 
 export interface CellProps {
   pokedex: Pokemon[];
   categoryIds: CategoryId[];
   seed: Seed;
   categoryIndex: number;
+  percent?: number;
 }
 
 export default function PendingCell({
@@ -26,24 +24,29 @@ export default function PendingCell({
   categoryIds,
   seed,
   categoryIndex,
+  percent,
 }: CellProps) {
   const [guesses, setGuesses] = useGuessContext();
 
-  const session = useSession();
+  const session = authClient.useSession();
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const [name, setName] = useState<string>("");
   const [guess, setGuess] = useState<Pokemon | null>(null);
 
-  const trpc = api.useUtils();
-  const { mutate } = api.makeGuess.useMutation({
-    onSettled: (_d, _e, { pokemonId }) => {
-      void trpc.guess.invalidate({
-        seed,
-        categoryIndex,
-        pokemonId,
-      });
+  const router = useRouter();
+
+  const { mutate } = useMutation({
+    mutationFn: (vars: {
+      seed: string;
+      username: string;
+      categoryIndex: number;
+      pokemonId: string;
+    }) => makeGuess({ data: vars }),
+    onSuccess: () => {
+      // Re-run the route loader to refresh guess percentages + answers.
+      void router.invalidate();
     },
   });
 
@@ -52,9 +55,7 @@ export default function PendingCell({
 
     const child = (
       <div className="h-full flex flex-col justify-center items-center">
-        <Suspense fallback={<CellImage pokemon={guess} />}>
-          <LoadedCell seed={seed} index={categoryIndex} guess={guess} />
-        </Suspense>
+        <LoadedCell guess={guess} percent={percent} />
       </div>
     );
 
@@ -132,7 +133,7 @@ export default function PendingCell({
                   handleSubmit(p);
                 }}
               >
-                <Image
+                <img
                   loading="lazy"
                   alt={p.name}
                   src={p.imageUrl ?? ""}

@@ -1,21 +1,18 @@
-"use client";
-
-import { useSession } from "next-auth/react";
+import { authClient } from "../../lib/auth-client.ts";
 import { toast } from "react-hot-toast";
-import { Button } from "~/components/ui/button";
+import { Button } from "../ui/button.tsx";
 
 export interface ShareProps {
   seed: string;
 }
 
 export default function Share({ seed }: ShareProps) {
-  const session = useSession();
+  const session = authClient.useSession();
 
   function handleShare() {
+    const baseUrl = import.meta.env.VITE_API_URL ?? "";
     void navigator.clipboard
-      .writeText(
-        `${process.env.NEXT_PUBLIC_API_URL}/${seed}/${session.data?.user.name}`,
-      )
+      .writeText(`${baseUrl}/${seed}/${session.data?.user.name}`)
       .then(() => toast("A sharable link has been copied to your clipboard!"));
   }
 

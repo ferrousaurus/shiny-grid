@@ -12,13 +12,14 @@
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 
-# next.js
+# next.js (legacy, kept for history)
 /.next/
 /out/
 next-env.d.ts
 
-# production
-/build
+# TanStack Start / Nitro build output
+/.output/
+/dist/
 
 # misc
 .DS_Store

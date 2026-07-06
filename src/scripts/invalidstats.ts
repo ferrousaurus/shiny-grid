@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient({ log: [] });
+import { prisma } from "../server/db.ts";
 
 async function main() {
   const types = await prisma.type.findMany();

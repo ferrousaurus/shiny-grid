@@ -1,29 +1,12 @@
-"use client";
-
-import { type Pokemon } from "~/lib/data/dex";
-import { api } from "~/utils/api";
-import Image from "next/image";
-import { useMemo } from "react";
+import { type Pokemon } from "../../lib/data/dex.tsx";
 
 export interface LoadedCellProps {
-  seed: string;
-  index: number;
   guess: Pokemon;
+  percent?: number;
 }
 
-export default function LoadedCell({ seed, index, guess }: LoadedCellProps) {
-  const vars = useMemo(
-    () => ({
-      seed,
-      categoryIndex: index,
-      pokemonId: guess.id,
-    }),
-    [seed, index, guess.id],
-  );
-
-  const [data] = api.guess.useSuspenseQuery(vars);
-
-  const p = Math.floor(data.percent * 100);
+export default function LoadedCell({ guess, percent }: LoadedCellProps) {
+  const p = percent === undefined ? NaN : Math.floor(percent * 100);
 
   return (
     <>
@@ -32,7 +15,7 @@ export default function LoadedCell({ seed, index, guess }: LoadedCellProps) {
           {p}%
         </div>
       )}
-      <Image
+      <img
         alt={guess.name}
         src={guess.imageUrl ?? ""}
         width={128}

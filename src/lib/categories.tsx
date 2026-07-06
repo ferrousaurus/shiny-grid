@@ -1,7 +1,6 @@
-import { type Pokemon } from "./data/dex";
-import Image from "next/image";
-import { type Seed } from "./getCategories";
-import { type ReactNode, cache } from "react";
+import { type Pokemon } from "./data/dex.tsx";
+import { type Seed } from "./getCategories.ts";
+import { type ReactNode } from "react";
 import gen from "random-seed";
 
 interface Category {
@@ -22,7 +21,7 @@ function Type({ type }: { type: string }) {
   return (
     <div className="flex flex-col w-full">
       <div className="w-full flex justify-center">
-        <Image
+        <img
           alt={`${type} Type`}
           src={`/types/${type.toLowerCase()}.png`}
           width={64}
@@ -52,7 +51,7 @@ function Generation({
     <div className="flex flex-col">
       <Grid width={games.length}>
         {games.map(({ version, extension = "png" }) => (
-          <Image
+          <img
             key={version}
             alt={version}
             src={`/boxart/${version}.${extension}`}
@@ -397,7 +396,7 @@ const hardcodedGrids: Record<Seed, CategoryId[]> = {
   ],
 };
 
-export const getCategories: (seed: Seed) => CategoryId[] = cache((seed) => {
+export const getCategories: (seed: Seed) => CategoryId[] = (seed) => {
   const hardcoded = hardcodedGrids[seed];
   if (hardcoded !== undefined) {
     return hardcoded;
@@ -407,4 +406,4 @@ export const getCategories: (seed: Seed) => CategoryId[] = cache((seed) => {
   const cats = [...Array(6).keys()].map(() => catIds[rand(catIds.length)]!);
 
   return isInvalidGrid(cats) ? getCategories(`${seed}X`) : cats;
-});
+};

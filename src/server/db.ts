@@ -1,5 +1,13 @@
-import { PrismaClient } from "@prisma/client";
-import { env } from "~/env.mjs";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
+import { PrismaClient } from "../../prisma/generated/client.ts";
+import { env } from "../env.ts";
+
+const pool = new pg.Pool({
+  connectionString: env.POSTGRES_PRISMA_URL,
+});
+
+const adapter = new PrismaPg(pool);
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -8,6 +16,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter,
     log: env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 

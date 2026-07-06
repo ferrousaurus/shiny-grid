@@ -1,57 +1,46 @@
-FROM node:20-alpine3.20 AS base
+# syntax=docker/dockerfile:1
+FROM denoland/deno:alpine-2.9.1 AS base
 
-# Install dependencies only when needed
+# ---- deps ----
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
+COPY deno.json deno.lock package.json ./
+COPY prisma ./prisma
+# Install npm deps (nodeModulesDir auto) and generate the Prisma client so
+# the generated `.prisma/client` is present for both build and runtime.
+RUN deno install --frozen 2>/dev/null || deno install
+RUN deno run --allow-all npm:prisma generate
 
-# Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml* ./
-COPY ./prisma ./prisma
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
-# Rebuild the source code only when needed
+# ---- build ----
 FROM base AS builder
 WORKDIR /app
+ARG VITE_API_URL=http://localhost:3000
+ENV VITE_API_URL=$VITE_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Build the Vite/Nitro bundle (.output/). VITE_* client env is baked in here.
+RUN deno task build
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN corepack enable pnpm && pnpm run build
-
-# Production image, copy all the files and run next
+# ---- runtime ----
 FROM base AS runner
 WORKDIR /app
-
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV DENO_DIR=/app/.deno
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
+# The Nitro deno-server preset externalizes node deps (e.g. @prisma/client),
+# so the runtime needs the node_modules tree (incl. the generated Prisma
+# client) resolvable from the .output bundle via Deno's upward node_modules walk.
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
+COPY --from=builder /app/deno.json ./deno.json
+COPY --from=builder /app/deno.lock ./deno.lock
+COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
-
 ENV PORT=3000
+ENV HOST=0.0.0.0
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD HOSTNAME="0.0.0.0" node server.js
+# Apply migrations then start the Nitro server (Deno preset).
+CMD ["sh", "-c", "deno run --allow-all npm:prisma migrate deploy && deno run --allow-all .output/server/index.mjs"]
