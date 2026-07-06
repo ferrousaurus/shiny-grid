@@ -1,10 +1,9 @@
-import Image from "next/image";
-import { type Pokemon } from "~/lib/data/dex";
+import { type Pokemon } from "../../lib/data/dex.tsx";
 
 export default function CellImage({ pokemon }: { pokemon: Pokemon }) {
   return (
     <>
-      <Image
+      <img
         alt={pokemon.name}
         src={pokemon.imageUrl ?? ""}
         width={128}

@@ -1,19 +1,17 @@
-import { getServerSession } from "next-auth";
-import { use } from "react";
-import LoggedInHeader from "./LoggedInHeader";
-import LoggedOutHeader from "./LoggedOutHeader";
-import { authOptions } from "~/server/auth";
+import { authClient } from "../../lib/auth-client.ts";
+import LoggedInHeader from "./LoggedInHeader.tsx";
+import LoggedOutHeader from "./LoggedOutHeader.tsx";
 
 export interface HeaderProps {
   seed: string;
 }
 
 export default function Header({ seed }: HeaderProps) {
-  const session = use(getServerSession(authOptions));
+  const session = authClient.useSession();
 
   return (
     <div className="p-2">
-      {session ? <LoggedInHeader seed={seed} /> : <LoggedOutHeader />}
+      {session.data ? <LoggedInHeader seed={seed} /> : <LoggedOutHeader />}
     </div>
   );
 }

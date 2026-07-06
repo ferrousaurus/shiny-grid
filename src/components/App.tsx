@@ -1,12 +1,10 @@
-"use client";
-
 import { useState, type ReactNode } from "react";
-import { type Pokemon } from "~/lib/data/dex";
+import { type Pokemon } from "../lib/data/dex.tsx";
 
-import Cell from "./Cell";
-import { type CategoryId } from "~/lib/categories";
-import CategoryLabel from "./CategoryLabel";
-import { GuessContext } from "~/lib/contexts/GuessContext";
+import Cell from "./Cell/index.tsx";
+import { type CategoryId } from "../lib/categories.tsx";
+import CategoryLabel from "./CategoryLabel/index.tsx";
+import { GuessContext } from "../lib/contexts/GuessContext.ts";
 
 interface Answer {
   categoryIndex: number;
@@ -20,6 +18,7 @@ export interface GridProps {
   categoryIds: CategoryId[];
   username?: string;
   initialAnswers: Answer[];
+  percents: Map<string, number>;
 }
 
 const rows = [...Array(3).keys()]
@@ -49,6 +48,7 @@ export default function App({
   seed,
   categoryIds,
   initialAnswers,
+  percents,
 }: GridProps) {
   const guessState = useState(parseInitialAnswers(initialAnswers, dex));
 
@@ -75,6 +75,7 @@ export default function App({
                 initialGuess={guesses[c.index]}
                 categoryIds={[categoryIds[c.cat1]!, categoryIds[c.cat2]!]}
                 pokedex={dex}
+                percents={percents}
               />
             ))}
             <div className="h-32">
@@ -88,6 +89,7 @@ export default function App({
                 initialGuess={guesses[c.index]}
                 categoryIds={[categoryIds[c.cat1]!, categoryIds[c.cat2]!]}
                 pokedex={dex}
+                percents={percents}
               />
             ))}
             <div className="h-32">
@@ -101,6 +103,7 @@ export default function App({
                 initialGuess={guesses[c.index]}
                 categoryIds={[categoryIds[c.cat1]!, categoryIds[c.cat2]!]}
                 pokedex={dex}
+                percents={percents}
               />
             ))}
           </GuessContext.Provider>

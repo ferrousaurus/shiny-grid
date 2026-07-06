@@ -1,4 +1,4 @@
-import { type CategoryId, categories } from "~/lib/categories";
+import { type CategoryId, categories } from "../../lib/categories.tsx";
 
 interface CategoryProps {
   category: CategoryId;

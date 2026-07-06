@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+  "nodeModulesDir": "auto",
+  "allowScripts": {
+    "allow": [
+      "npm:@prisma/client@5.22.0",
+      "npm:@prisma/client@6.19.3",
+      "npm:@prisma/client@6.2.1",
+      "npm:@prisma/client@7.8.0",
+      "npm:@prisma/engines@6.19.3",
+      "npm:@prisma/engines@7.8.0",
+      "npm:better-sqlite3@12.11.1",
+      "npm:esbuild@0.28.1",
+      "npm:prisma@6.19.3",
+      "npm:prisma@6.2.1",
+      "npm:prisma@7.8.0",
+      "npm:sharp",
+      "npm:sharp@0.34.5"
+    ],
+    "deny": ["npm:fsevents@2.3.3", "npm:sharp@0.33.5", "npm:unrs-resolver@1.12.2"]
+  },
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns", "deno.unstable"],
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "types": ["vite/client"]
+  }
+}

@@ -1,10 +1,8 @@
-import { type Pokemon } from "~/lib/data/dex";
-import PendingCell from "./PendingCell";
-import { Suspense } from "react";
-import LoadedCell from "./LoadedCell";
-import { type CategoryId, tests } from "~/lib/categories";
-import CellImage from "./CellImage";
-import { useGuessContext } from "~/lib/contexts/GuessContext";
+import { type Pokemon } from "../../lib/data/dex.tsx";
+import PendingCell from "./PendingCell.tsx";
+import LoadedCell from "./LoadedCell.tsx";
+import { type CategoryId, tests } from "../../lib/categories.tsx";
+import { useGuessContext } from "../../lib/contexts/GuessContext.ts";
 import clsx from "clsx";
 
 export interface CellProps {
@@ -13,6 +11,7 @@ export interface CellProps {
   pokedex: Pokemon[];
   initialGuess?: Pokemon;
   categoryIds: CategoryId[];
+  percents: Map<string, number>;
 }
 
 export default function Cell({
@@ -21,6 +20,7 @@ export default function Cell({
   pokedex,
   initialGuess,
   categoryIds,
+  percents,
 }: CellProps) {
   const [guesses] = useGuessContext();
 
@@ -40,6 +40,7 @@ export default function Cell({
   }
 
   const isSuccess = categoryIds.every((c) => tests[c]?.(pokemon));
+  const percent = percents.get(`${index}:${pokemon.id}`);
 
   return (
     <div className="w-full">
@@ -49,9 +50,7 @@ export default function Cell({
           isSuccess ? "bg-green-500" : "bg-red-500",
         )}
       >
-        <Suspense fallback={<CellImage pokemon={pokemon} />}>
-          <LoadedCell index={index} seed={seed} guess={pokemon} />
-        </Suspense>
+        <LoadedCell guess={pokemon} percent={percent} />
       </div>
     </div>
   );

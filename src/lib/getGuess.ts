@@ -1,4 +1,4 @@
-import { prisma } from "~/server/db";
+import { prisma } from "../server/db.ts";
 
 export default async function getGuess({
   seed,
