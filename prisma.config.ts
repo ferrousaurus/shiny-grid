@@ -8,6 +8,6 @@ export default defineConfig({
     seed: "deno run -A prisma/seed.ts",
   },
   datasource: {
-    url: env("POSTGRES_PRISMA_URL") || env("DATABASE_URL"),
+    url: env("DATABASE_URL"),
   },
 });

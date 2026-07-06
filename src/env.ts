@@ -11,14 +11,14 @@ const getEnv = (key: string): string | undefined => {
  *
  * In TanStack Start (Vite), `import.meta.env` only exposes `VITE_*`-prefixed
  * vars (plus built-ins like `MODE`/`DEV`/`PROD`). Server-only secrets such as
- * `POSTGRES_PRISMA_URL`, `AUTH_SECRET`, provider credentials, and even
+ * `DATABASE_URL`, `AUTH_SECRET`, provider credentials, and even
  * `NODE_ENV` are NOT on `import.meta.env` and must be read from `import.meta.env`.
  * Only the client-exposed var (`VITE_API_URL`) is sourced from
  * `import.meta.env` so it gets baked into the client bundle.
  */
 export const env = createEnv({
   server: {
-    POSTGRES_PRISMA_URL: z.url(),
+    DATABASE_URL: z.url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     AUTH_SECRET: getEnv("NODE_ENV") === "production" ? z.string().min(1) : z.string().min(1).optional(),
     AUTH_URL: z.string().url(),
@@ -53,7 +53,7 @@ export const env = createEnv({
     VITE_API_URL: import.meta.env.VITE_API_URL,
 
     // Server-only: `import.meta.env`, NOT `import.meta.env`.
-    POSTGRES_PRISMA_URL: getEnv("POSTGRES_PRISMA_URL"),
+    DATABASE_URL: getEnv("POSTGRES_PRISMA_URL"),
     NODE_ENV: getEnv("NODE_ENV"),
     AUTH_SECRET: getEnv("AUTH_SECRET"),
     AUTH_URL: getEnv("AUTH_URL"),
@@ -78,7 +78,5 @@ export const env = createEnv({
   },
 
   skipValidation:
-    import.meta.env.SKIP_ENV_VALIDATION === "true" ||
-    typeof window !== "undefined" ||
-    import.meta.env.SSR === false,
+    import.meta.env.SKIP_ENV_VALIDATION === "true" || typeof window !== "undefined" || import.meta.env.SSR === false,
 });

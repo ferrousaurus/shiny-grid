@@ -3,12 +3,12 @@ import forms from "./forms.json" with { type: "json" };
 import mega from "./mega.json" with { type: "json" };
 import regional from "./regional.json" with { type: "json" };
 
-import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
 import pg from "pg";
 import { PrismaClient } from "./generated/client.ts";
 
-const pool = new pg.Pool({ connectionString: process.env.POSTGRES_PRISMA_URL! });
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter, log: [] });
 
