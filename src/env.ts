@@ -19,7 +19,6 @@ const getEnv = (key: string): string | undefined => {
 export const env = createEnv({
   server: {
     DATABASE_URL: z.url(),
-    NODE_ENV: z.enum(["development", "test", "production"]),
     AUTH_SECRET: getEnv("NODE_ENV") === "production" ? z.string().min(1) : z.string().min(1).optional(),
     AUTH_URL: z.string().url(),
 
@@ -54,7 +53,6 @@ export const env = createEnv({
 
     // Server-only: `import.meta.env`, NOT `import.meta.env`.
     DATABASE_URL: getEnv("POSTGRES_PRISMA_URL"),
-    NODE_ENV: getEnv("NODE_ENV"),
     AUTH_SECRET: getEnv("AUTH_SECRET"),
     AUTH_URL: getEnv("AUTH_URL"),
 

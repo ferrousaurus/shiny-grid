@@ -24,7 +24,6 @@ RUN deno task build
 # ---- runtime ----
 FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 ENV DENO_DIR=/app/.deno
 
 # The Nitro deno-server preset externalizes node deps (e.g. @prisma/client),
